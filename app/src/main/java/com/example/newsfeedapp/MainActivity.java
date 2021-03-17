@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     String webUrl = firstResult.getString("webUrl");
 
                     // Create a new {@link Event} object
-                    newsList.add(new NewsArticle(title, webUrl, time));
+                    newsList.add(new NewsArticle(title, time, webUrl));
                     Log.i(LOG_TAG, "run iteration " + i);
                 }
 
