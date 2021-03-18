@@ -44,6 +44,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         NewsAsyncTask task = new NewsAsyncTask();
         task.execute();
 
+        ListView listView = findViewById(R.id.list_view);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                NewsArticle selection = newsList.get(position);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selection.getWebUrl()));
+                startActivity(browserIntent);
+            }
+
+        });
+
     }
 
     /**
@@ -64,14 +75,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        //TODO: open article onclick
-        //Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(newsList.get(position).getLink()));
-        //startActivity(browserIntent);
+        //Does Nothing
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+        //Does Nothing
     }
 
     /**
