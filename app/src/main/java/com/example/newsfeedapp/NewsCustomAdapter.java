@@ -37,6 +37,9 @@ public class NewsCustomAdapter extends ArrayAdapter<NewsArticle> {
         TextView articlePublishTime = listView.findViewById(R.id.date);
         articlePublishTime.setText(currentItem.getPublishTime());
 
+        TextView articleSection = listView.findViewById(R.id.articleSection);
+        articleSection.setText(currentItem.getArticleSection());
+
         return listView;
 
     }

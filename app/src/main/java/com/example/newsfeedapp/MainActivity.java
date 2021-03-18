@@ -26,7 +26,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
-
+    //TODO: Refractor to use loaders
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     ArrayList<NewsArticle> newsList = new ArrayList<>();
@@ -198,15 +198,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 for (int i = 0; i < length; i++) {
                     JSONArray results = featureArray.getJSONArray("results");
                     // Extract out the first feature (which is a news item)
-                    JSONObject firstResult = results.getJSONObject(i);
+                    JSONObject articleResult = results.getJSONObject(i);
 
                     // Extract out the title, time, and tsunami values
-                    String title = firstResult.getString("webTitle");
-                    String time = firstResult.getString("webPublicationDate");
-                    String webUrl = firstResult.getString("webUrl");
+                    String title = articleResult.getString("webTitle");
+                    String time = articleResult.getString("webPublicationDate");
+                    String webUrl = articleResult.getString("webUrl");
+                    String articleSection = articleResult.getString("sectionName");
 
                     // Create a new {@link Event} object
-                    newsList.add(new NewsArticle(title, time, webUrl));
+                    newsList.add(new NewsArticle(title, time, webUrl, articleSection));
                     Log.i(LOG_TAG, "run iteration " + i);
                 }
 
