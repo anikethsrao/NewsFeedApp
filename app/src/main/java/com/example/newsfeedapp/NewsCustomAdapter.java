@@ -6,41 +6,67 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class NewsCustomAdapter extends ArrayAdapter<NewsArticle> {
+public class NewsCustomAdapter extends BaseAdapter {
 
+    private LayoutInflater inflater;
+    private List<NewsArticle> newsArticles = new ArrayList<NewsArticle>();
 
-    public NewsCustomAdapter(@NonNull Context context, @NonNull List<NewsArticle> objects) {
-        super(context, 0, objects);
+    public NewsCustomAdapter(Context context, List<NewsArticle> newsArticles) {
+        this.newsArticles = newsArticles;
+        inflater = LayoutInflater.from(context);
     }
 
-    @NonNull
-    @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
-        View listView = convertView;
-        if (listView == null){
-            listView = LayoutInflater.from(getContext()).inflate(R.layout.news_layout, parent,false);
+
+    @Override
+    public int getCount() {
+        return newsArticles.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return newsArticles.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+
+        View rootView = convertView;
+        if (rootView == null) {
+            rootView = inflater.inflate(R.layout.news_layout, parent, false);
         }
 
-        NewsArticle currentItem = getItem(position);
+        NewsArticle currentItem = (NewsArticle) getItem(position);
 
-        TextView articleTitle = listView.findViewById(R.id.title);
-        articleTitle.setText(currentItem.getTitle());
+        TextView titleText = rootView.findViewById(R.id.title);
+        titleText.setText(currentItem.title);
 
-        TextView articlePublishTime = listView.findViewById(R.id.date);
-        articlePublishTime.setText(currentItem.getPublishTime());
+        TextView publishDate = rootView.findViewById(R.id.date);
+        publishDate.setText(currentItem.publishTime);
 
-        TextView articleSection = listView.findViewById(R.id.articleSection);
-        articleSection.setText(currentItem.getArticleSection());
+        TextView articleSection = rootView.findViewById(R.id.articleSection);
+        articleSection.setText(currentItem.articleSection);
 
-        return listView;
+        return rootView;
 
+    }
+
+    public void setData(List<NewsArticle> data) {
+        newsArticles.addAll(data);
+        notifyDataSetChanged();
     }
 }

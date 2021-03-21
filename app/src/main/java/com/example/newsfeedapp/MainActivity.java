@@ -1,6 +1,10 @@
 package com.example.newsfeedapp;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -24,32 +28,33 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<NewsArticle>>, AdapterView.OnItemSelectedListener {
     //TODO: Refractor to use loaders
+
+    //create log tag for error message debugging
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    ArrayList<NewsArticle> newsList = new ArrayList<>();
+    private NewsCustomAdapter adapter;
 
-    /** URL to query the Guardian dataset for recent news articles */
-    private static String KEY = "9a4f10da-3692-459b-bc3e-aa2fb36d23a6";
-    private static String REQUEST_URL = "https://content.guardianapis.com/search?api-key=9a4f10da-3692-459b-bc3e-aa2fb36d23a6";
+    ArrayList<NewsArticle> newsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Kick off an {@link AsyncTask} to perform the network request
-        NewsAsyncTask task = new NewsAsyncTask();
-        task.execute();
-
+        adapter = new NewsCustomAdapter(this, new ArrayList<>());
         ListView listView = findViewById(R.id.list_view);
+        listView.setAdapter(adapter);
+        LoaderManager.getInstance(this);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 NewsArticle selection = newsList.get(position);
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selection.getWebUrl()));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selection.webUrl));
                 startActivity(browserIntent);
             }
 
@@ -69,152 +74,29 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    /**
-     * Open item link on item selection
-     * @param position position of selected item
-     */
+    @NonNull
+    @Override
+    public Loader<List<NewsArticle>> onCreateLoader(int id, @Nullable Bundle args) {
+        return new NewsArticleLoader(MainActivity.this);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<List<NewsArticle>> loader, List<NewsArticle> data) {
+        adapter.setData(data);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<List<NewsArticle>> loader) {
+        adapter.setData(new ArrayList<NewsArticle>());
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        //Does Nothing
+        // Does Nothing
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        //Does Nothing
-    }
-
-    /**
-     * {@link AsyncTask} to perform the network request on a background thread, and then
-     * update the UI with the first earthquake in the response.
-     */
-    private class NewsAsyncTask extends AsyncTask<URL, Void, NewsArticle> {
-
-        @Override
-        protected NewsArticle doInBackground(URL... urls) {
-            // Create URL object
-            URL url = createUrl(REQUEST_URL);
-
-            // Perform HTTP request to the URL and receive a JSON response back
-            String jsonResponse = "";
-            try {
-                jsonResponse = makeHttpRequest(url);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "" + e);
-            }
-
-            // Extract relevant fields from the JSON response and create an {@link NewsArticle} object
-            NewsArticle newsArticle = extractFeatureFromJson(jsonResponse);
-
-            // Return the {@link Event} object as the result fo the {@link TsunamiAsyncTask}
-            return newsArticle;
-        }
-
-        /**
-         * Update the screen with the given newsArticle (which was the result of the
-         * {@link NewsAsyncTask}).
-         */
-        @Override
-        protected void onPostExecute(NewsArticle newsArticle) {
-            if (newsList == null) {
-                Log.e(LOG_TAG, "ERROR: newsArticle == null");
-                return;
-            }
-            Log.i(LOG_TAG, "onPostExecute updating UI");
-            updateUi();
-        }
-
-        /**
-         * Returns new URL object from the given string URL.
-         */
-        private URL createUrl(String stringUrl) {
-            URL url = null;
-            try {
-                url = new URL(stringUrl);
-            } catch (MalformedURLException exception) {
-                Log.e(LOG_TAG, "Error with creating URL", exception);
-                return null;
-            }
-            return url;
-        }
-
-        /**
-         * Make an HTTP request to the given URL and return a String as the response.
-         */
-        private String makeHttpRequest(URL url) throws IOException {
-            String jsonResponse = "";
-            HttpURLConnection urlConnection = null;
-            InputStream inputStream = null;
-            try {
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setReadTimeout(10000 /* milliseconds */);
-                urlConnection.setConnectTimeout(15000 /* milliseconds */);
-                urlConnection.connect();
-                inputStream = urlConnection.getInputStream();
-                jsonResponse = readFromStream(inputStream);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "" + e);
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (inputStream != null) {
-                    // function must handle java.io.IOException here
-                    inputStream.close();
-                }
-            }
-            return jsonResponse;
-        }
-
-        /**
-         * Convert the {@link InputStream} into a String which contains the
-         * whole JSON response from the server.
-         */
-        private String readFromStream(InputStream inputStream) throws IOException {
-            StringBuilder output = new StringBuilder();
-            if (inputStream != null) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
-                BufferedReader reader = new BufferedReader(inputStreamReader);
-                String line = reader.readLine();
-                while (line != null) {
-                    output.append(line);
-                    line = reader.readLine();
-                }
-            }
-            return output.toString();
-        }
-
-        /**
-         * Return an {@link NewsArticle} object by parsing out information
-         * about the first earthquake from the input newsJSON string.
-         */
-        private NewsArticle extractFeatureFromJson(String newsJSON) {
-            try {
-                JSONObject baseJsonResponse = new JSONObject(newsJSON);
-                JSONObject featureArray = baseJsonResponse.getJSONObject("response");
-
-                // If there are results in the features array
-                int length = featureArray.length();
-                for (int i = 0; i < length; i++) {
-                    JSONArray results = featureArray.getJSONArray("results");
-                    // Extract out the first feature (which is a news item)
-                    JSONObject articleResult = results.getJSONObject(i);
-
-                    // Extract out the title, time, and tsunami values
-                    String title = articleResult.getString("webTitle");
-                    String time = articleResult.getString("webPublicationDate");
-                    String webUrl = articleResult.getString("webUrl");
-                    String articleSection = articleResult.getString("sectionName");
-
-                    // Create a new {@link Event} object
-                    newsList.add(new NewsArticle(title, time, webUrl, articleSection));
-                    Log.i(LOG_TAG, "run iteration " + i);
-                }
-
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, "Problem parsing the earthquake JSON results", e);
-            }
-            return null;
-        }
+        // Does Nothing
     }
 }
