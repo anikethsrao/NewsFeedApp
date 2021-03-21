@@ -25,7 +25,7 @@ import java.util.List;
 public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
 
     //create log tag for error message debugging
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String LOG_TAG = NewsArticleLoader.class.getSimpleName();
 
     /** URL to query the Guardian dataset for recent news articles */
     private static String KEY = "9a4f10da-3692-459b-bc3e-aa2fb36d23a6";
@@ -49,9 +49,10 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = "";
         try {
+            Log.i(LOG_TAG, "making request");
             jsonResponse = makeHttpRequest(url);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "" + e);
+            Log.e(LOG_TAG, "Failed at Making Request" + e);
         }
 
         // Extract relevant fields from the JSON response and create an {@link NewsArticle} object
@@ -92,7 +93,7 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
             inputStream = urlConnection.getInputStream();
             jsonResponse = readFromStream(inputStream);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "" + e);
+            Log.e(LOG_TAG, "Failed at makeHttpRequest" + e);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();

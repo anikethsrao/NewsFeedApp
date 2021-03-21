@@ -25,8 +25,6 @@ public class NewsCustomAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
-
-
     @Override
     public int getCount() {
         return newsArticles.size();
@@ -68,5 +66,6 @@ public class NewsCustomAdapter extends BaseAdapter {
     public void setData(List<NewsArticle> data) {
         newsArticles.addAll(data);
         notifyDataSetChanged();
+
     }
 }
