@@ -1,6 +1,7 @@
 package com.example.newsfeedapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -43,8 +44,16 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
     @Override
     public List<NewsArticle> loadInBackground() {
 
+        //Create url using URI builder
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority("content.guardianapis.com")
+                .appendPath("search")
+                .appendQueryParameter("api-key", KEY);
+        String myUrl = builder.build().toString();
+
         // Create URL object
-        URL url = createUrl(REQUEST_URL);
+        URL url = createUrl(myUrl);
 
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = "";
@@ -57,7 +66,6 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
 
         // Extract relevant fields from the JSON response and create an {@link NewsArticle} object
         ArrayList<NewsArticle> newsArticle = extractFeatureFromJson(jsonResponse);
-
         // Return the {@link Event} object as the result fo the {@link TsunamiAsyncTask}
         return newsArticle;
 
@@ -129,9 +137,7 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
      * about the first earthquake from the input newsJSON string.
      */
     private ArrayList<NewsArticle> extractFeatureFromJson(String newsJSON) {
-
         ArrayList<NewsArticle> newsList = new ArrayList<>();
-
         try {
             JSONObject baseJsonResponse = new JSONObject(newsJSON);
             JSONObject featureArray = baseJsonResponse.getJSONObject("response");
@@ -146,6 +152,7 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
                 // Extract out the title, time, and tsunami values
                 String title = articleResult.getString("webTitle");
                 String time = articleResult.getString("webPublicationDate");
+                time = time.split("T")[0];
                 String webUrl = articleResult.getString("webUrl");
                 String articleSection = articleResult.getString("sectionName");
 
@@ -153,11 +160,9 @@ public class NewsArticleLoader extends AsyncTaskLoader<List<NewsArticle>> {
                 newsList.add(new NewsArticle(title, time, webUrl, articleSection));
                 Log.i(LOG_TAG, "run iteration " + i);
             }
-
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the earthquake JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing The Guardian JSON results", e);
         }
         return newsList;
     }
-
 }
