@@ -4,31 +4,44 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="16dp"
         tools:ignore="MissingConstraints">
 
         <TextView
             android:id="@+id/title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            style="@style/article_title"
             tools:text="Title" />
 
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:layout_alignRight="@id/title"
+            style="@style/article_date"
             tools:text="date" />
 
         <TextView
             android:id="@+id/articleSection"
             android:layout_width="wrap_content"
+            android:layout_below="@id/title"
+            style="@style/article_date"
+            android:layout_alignLeft="@id/title"
             android:layout_height="wrap_content"
             tools:text="section" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
