@@ -47,8 +47,7 @@ public class MainActivity extends AppCompatActivity implements
         ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
         if (isConnected){
             LoaderManager loaderManager = getSupportLoaderManager();
@@ -78,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<NewsArticle>> loader, List<NewsArticle> data) {
+        Log.i(LOG_TAG, "onLoadFinished");
         adapter.setData(data);
         newsList = new ArrayList<>(data);
-
         // Set empty state text to display "No earthquakes found."
         emptyView.setText(R.string.no_news);
     }
