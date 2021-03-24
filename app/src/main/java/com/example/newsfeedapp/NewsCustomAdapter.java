@@ -59,6 +59,9 @@ public class NewsCustomAdapter extends BaseAdapter {
         TextView articleSection = rootView.findViewById(R.id.articleSection);
         articleSection.setText(currentItem.articleSection);
 
+        TextView articleContributor = rootView.findViewById(R.id.contributor);
+        articleContributor.setText(currentItem.contributor[0]);
+
         return rootView;
 
     }
